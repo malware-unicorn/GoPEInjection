@@ -23,8 +23,8 @@ import (
 )
 
 func IsSysWow64(ntdll syscall.Handle) (bool, error) {
-	var ppeb32 uintptr
-	ppeb32Len := uint32(unsafe.Sizeof(ppeb32))
+	var pInfo uintptr
+	pInfoLen := uint32(unsafe.Sizeof(pInfo))
 	ZwQueryInformationProcess, err := syscall.GetProcAddress(
 		syscall.Handle(ntdll), "ZwQueryInformationProcess")
 	if err != nil {
@@ -34,9 +34,9 @@ func IsSysWow64(ntdll syscall.Handle) (bool, error) {
 		5,
 		uintptr(windows.CurrentProcess()),        // ProcessHandle
 		uintptr(windows.ProcessWow64Information), // ProcessInformationClass
-		uintptr(unsafe.Pointer(&ppeb32)),         // ProcessInformation
+		uintptr(unsafe.Pointer(&pInfo)),         // ProcessInformation
 		uintptr(ppeb32Len),                       // ProcessInformationLength
-		uintptr(unsafe.Pointer(&ppeb32Len)),      // ReturnLength
+		uintptr(unsafe.Pointer(&pInfoLen)),      // ReturnLength
 		0)
 	if r != 0 {
 		log.Printf("ZwQueryInformationProcess ERROR CODE: %x", r)

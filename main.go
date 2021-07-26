@@ -35,7 +35,7 @@ func IsSysWow64(ntdll syscall.Handle) (bool, error) {
 		uintptr(windows.CurrentProcess()),        // ProcessHandle
 		uintptr(windows.ProcessWow64Information), // ProcessInformationClass
 		uintptr(unsafe.Pointer(&pInfo)),         // ProcessInformation
-		uintptr(ppeb32Len),                       // ProcessInformationLength
+		uintptr(pInfoLen),                       // ProcessInformationLength
 		uintptr(unsafe.Pointer(&pInfoLen)),      // ReturnLength
 		0)
 	if r != 0 {

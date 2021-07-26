@@ -42,7 +42,7 @@ func IsSysWow64(ntdll syscall.Handle) (bool, error) {
 		log.Printf("ZwQueryInformationProcess ERROR CODE: %x", r)
 		return false, err
 	}
-	if ppeb32 != 0 {
+	if pInfo != 0 {
 		return true, nil
 	}
 	return false, nil

